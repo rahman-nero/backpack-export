@@ -7,7 +7,7 @@
         "phpoffice/phpspreadsheet": "^1.29",
         "anourvalar/eloquent-serialize": "^1.2"
     },
-    "license": "MTI",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Nero\\BackpackExport\\": "src/"
