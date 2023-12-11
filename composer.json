@@ -1,0 +1,30 @@
+{
+    "name": "nero/backpack_export",
+    "type": "library",
+    "require": {
+        "php" : "^8.1",
+        "backpack/crud": "^5.4",
+        "phpoffice/phpspreadsheet": "^1.29",
+        "anourvalar/eloquent-serialize": "^1.2"
+    },
+    "license": "MTI",
+    "autoload": {
+        "psr-4": {
+            "Nero\\BackpackExport\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "rahman",
+            "email": "dikaevr053@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nero\\BackpackExport\\Application\\ExportServiceProvider"
+            ]
+        }
+    }
+}
