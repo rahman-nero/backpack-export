@@ -3,7 +3,7 @@
 To install this package, you have to run this command:
 
 ```
-composer require nero/backpack_export
+composer require nero/backpack-export
 ```
 
 Next step is to run:
