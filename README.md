@@ -49,3 +49,4 @@ It's done!. Now you can export all data from table, not only the displayed ones
 - [ ] Improve handling custom_html columns
 - [ ] Refactoring code
 - [ ] Convert date format in row ("Monday 11 December 2023 14:00:00") to application chosen format
+- [ ] Agility to except any columns from export
