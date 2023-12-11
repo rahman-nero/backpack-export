@@ -47,4 +47,5 @@ It's done!. Now you can export all data from table, not only the displayed ones
 - [ ] Write a better documentation
 - [ ] Make PDF compatibility
 - [ ] Rewrite all comments from Russian to English
+- [ ] Improve handling custom_html columns
 
