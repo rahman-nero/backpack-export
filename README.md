@@ -48,5 +48,7 @@ It's done!. Now you can export all data from table, not only the displayed ones
 - [ ] Rewrite all comments from Russian to English
 - [ ] Improve handling custom_html columns
 - [ ] Refactoring code
+    - [ ] Fix fetch in view (list.blade.php)
+    - [ ] Remove unnecessary code 
 - [ ] Convert date format in row ("Monday 11 December 2023 14:00:00") to application chosen format
 - [ ] Agility to except any columns from export
