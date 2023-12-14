@@ -68,7 +68,8 @@ rm resource/views/vendor/backpack/crud/inc/export_buttons.blade.php
 
 As last step is deleting language packages:
 ```bash
-rm -rf resources/lang/vendor/backpack-export
+rm resources/lang/en/backpack_export.php
+rm resources/lang/ru/backpack_export.php
 ```
 
 ## TODO
