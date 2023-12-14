@@ -26,7 +26,7 @@ final class ExportServiceProvider extends ServiceProvider
 
         // Publishing languages
         $this->publishes([
-            __DIR__ . '/resources/lang' => $this->app->langPath('vendor/backpack-export'),
+            __DIR__ . '/resources/lang' =>  resource_path('lang/vendor/backpack-export'),
         ]);
     }
 
