@@ -46,9 +46,8 @@ It's done!. Now you can export all data from table, not only the displayed ones
 ## Uninstall
 
 Uninstalling process is not complicated. It consists of two steps:
-
-1. removing package
-2. removing config and views
+1. removing package from composer
+2. removing config, views and language files
 
 To remove package, execute this command
 
@@ -60,6 +59,16 @@ Then we have to delete config. It can be found in config, full path `config/back
 
 ```bash
 rm config/backpack_export.php
+```
+
+Now we have to delete `export_buttons.blade.php`. It can be found as `resource/views/vendor/backpack/crud/inc/export_buttons.blade.php`:
+```bash
+rm resource/views/vendor/backpack/crud/inc/export_buttons.blade.php
+```
+
+As last step is deleting language packages:
+```bash
+rm -rf resources/lang/vendor/backpack-export
 ```
 
 ## TODO
