@@ -2,8 +2,6 @@
 
 namespace Nero\BackpackExport\Application\Jobs;
 
-use Nero\BackpackExport\Enums\SupportedExtension;
-use Nero\BackpackExport\ExportFactory;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,9 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Nero\BackpackExport\Enums\SupportedExtension;
+use Nero\BackpackExport\ExportFactory;
 
 /**
- * Job для экспорта данных со страниц
+ * Job to export data from page
  */
 final class Export implements ShouldQueue
 {
@@ -24,26 +24,28 @@ final class Export implements ShouldQueue
     use SerializesModels;
 
     /**
-     * Количество попыток выполнения job.
-     * Если при истечений всех попыток не удалось выполнить, job отправиться в failed_jobs
+     * Tries until export will be marked as failed
      */
     public int $tries = 1;
 
+    /**
+     * Timeout for execution
+     */
     private int $timeout;
 
     /**
-     * Содержит QueryBuilder которого сериализовали
-     * Нужен для получения корректных записей.
+     * Contains QueryBuilder that has been serialized
      */
     private string $serialized_query;
 
     /**
-     * Колонки из таблицы на странице, с которого делается экспорт
+     * Columns that has been defined in setupOperationList
+     * Contains all data about columns
      */
     private array $columns;
 
     /**
-     * ID-пользователя, кто хочет получить отчет
+     * ID User that started export
      */
     private ?int $user_id;
     private SupportedExtension $extension;
@@ -72,77 +74,73 @@ final class Export implements ShouldQueue
 
     public function handle(ExportFactory $export_factory): void
     {
-        // Получение отфильтрованных моделей которые выводятся на странице List
         /**
          * @var Builder $query
          */
         $query = \EloquentSerialize::unserialize($this->serialized_query);
 
-        // Получаем нужный вид экспорт-сервиса
+        // Getting specific exporter class based on extension
         $writer = $export_factory->make($this->extension);
 
-        // Названия всех колонок
+        // Defined names of columns
         $labels = array_column($this->columns, 'label');
 
-        // Заполняем колонки
+        // Filling first row of export file with columns
         $writer->fillColumns($labels);
 
+        // Chunking rows from database to not load database
         $query->chunk(config('backpack_export.chunk'), function ($entries) use ($writer) {
 
             $data = [];
 
-            // Информация о колонках которые выводятся на странице List
             $columns = $this->columns;
 
-            // $casts свойство у модели
+            // "Casts" from model
             $casts = $entries->first()->getCasts();
 
-            // Перебор данных из бд
             foreach ($entries as $item) {
                 $fill = [];
 
                 foreach ($columns as $column_settings) {
 
-                    // Название колонки
+                    // Column's name
                     $column_name = $column_settings['name'];
 
-                    // Тип колонки, может быть 'string', 'text', 'relationship' и 'custom_html'
+                    // Type of column
                     $type = $column_settings['type'];
 
-                    // Аттрибут модели, обычной нужен для связей
+                    // Attribute for column
                     $attribute = $column_settings['attribute'] ?? null;
 
-                    // Если тип 'relationship', то ищем attribute
-                    // Если тип 'relationship', но там находится 'custom_html', то делаем простой вывод как будто это обычный relationship
+                    // If column type is 'relationship' or 'custom_html', then just treat it like relationship
                     if ($type === 'relationship' || $type === 'custom_html') {
 
                         $relationship_result = null;
 
-                        // Если это связь выдает коллекцию, то перебираем и делаем конкатенацию через ;
+                        // If it's collecting, we join all data with ;
                         if ($item->{$column_name} instanceof Collection) {
                             $relationship_result = $item->{$column_name}->pluck($attribute)?->join(';');
                         } elseif ($item->{$column_name} instanceof Model) {
-                            // Если это простая модель, то есть связь один к одному
+                            // If it's just model, then it means it's one-to-one relationship, so we mustn't join data
                             $relationship_result = $item->{$column_name}->{$attribute};
                         } elseif (array_key_exists($column_name, $casts) && $casts[$column_name] === 'array') {
-                            // Если текущая колонка в casts отмечена как массив, то делаем join
+                            // If our columns is 'array' in model casts, then we join it with native php function
                             $relationship_result =
                                 $item->{$column_name} !== null
                                     ? implode(';', $item->{$column_name})
                                     : null;
                         }
 
-                        // Получаем значения по связи, получаем колонки по $attribute и делаем джоин с ; и получаем строку
                         $fill[] = $relationship_result;
                     } elseif ($type === 'date') {
                         $fill[] = $item->{$column_name}?->format('l j F Y');
                     } elseif ($type === 'datetime') {
                         $fill[] = $item->{$column_name}?->format('l j F Y H:i:s');
                     } elseif (array_key_exists($column_name, $casts) && $casts[$column_name] === 'array') {
-                        // Если текущая колонка в casts отмечена как массив, то делаем join
+                        // If our columns is 'array' in model casts, then we join it with native php function
                         $fill[] = implode(';', $item->{$column_name} ?? []);
                     } else {
-                        // На все остальные типы, применяем просто
+                        // All unhandled types will not be handled in any type
                         $fill[] = $item->{$column_name};
                     }
 
@@ -151,26 +149,31 @@ final class Export implements ShouldQueue
                 $data[] = $fill;
             }
 
+            // Filling export file up
             $writer->fill($data);
         });
 
-        // Сохранение файла
+        // Saving file
         $path_to_file = $writer->save($this->getOrCreatePath());
 
+        // Notifying user that the export is done
         $this->notifyUser($path_to_file);
     }
 
     /**
-     * Метод для уведомления пользователя о завершении экcпорта и отправка ссылки ему
+     * Method to notify the user that the export is done
      * @param string $path_to_file
      * @return void
      */
     private function notifyUser(string $path_to_file): void
     {
+        // Getting Notification class
         $notify = config('backpack_export.notify');
+
+        // Getting User model
         $user_model = config('backpack_export.user_model');
 
-        // Имя файла экспорта
+        // File name of export
         $file_name = basename($path_to_file);
 
         $user_model::query()
@@ -178,10 +181,15 @@ final class Export implements ShouldQueue
             ->notify(new $notify($path_to_file, $file_name));
     }
 
-    public function getOrCreatePath()
+    /**
+     * @return string
+     */
+    public function getOrCreatePath(): string
     {
+        // Path where to save file
         $path = config('backpack_export.directory_to_save');
 
+        // If the path don't exist, we will try to create
         if (!file_exists($path)) {
             mkdir($path, 0755);
         }

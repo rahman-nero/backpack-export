@@ -23,7 +23,7 @@ return [
     'notify'            => ExportUserNotify::class,
 
     /**
-     * User model
+     * User model to identify who send export request
      */
     'user_model'        => \App\Models\User::class,
 

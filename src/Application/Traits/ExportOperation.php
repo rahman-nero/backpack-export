@@ -2,13 +2,16 @@
 
 namespace Nero\BackpackExport\Application\Traits;
 
-use Nero\BackpackExport\Application\Jobs\Export;
-use Nero\BackpackExport\Enums\SupportedExtension;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Nero\BackpackExport\Application\Jobs\Export;
+use Nero\BackpackExport\Enums\SupportedExtension;
 
 trait ExportOperation
 {
+    /**
+     * Setting main routes up for export
+     */
     public function setupExportRoutes($segment, $routeName, $controller)
     {
         Route::post($segment . '/export', [
@@ -18,37 +21,43 @@ trait ExportOperation
         ]);
     }
 
+    /**
+     * Main method starting exporting
+     */
     public function setupExportOperation()
     {
         $user = Auth::user();
 
-        // объявленные колонки из setupListOperation
+        // All set up columns from setupListOperation. Cleaned up before serialization
         $columns = $this->removeCallbackValuesFromColumns($this->crud->columns());
 
-        // Засериализированный запрос для передачи в джоб
+        // Serialized query to pass to the job
         $serialized_query = \EloquentSerialize::serialize($this->crud->query);
 
+        // Type of export that user wants
         $export_type = $this->crud->getRequest()->input('export_type');
 
         $type = match ($export_type) {
             'csv' => SupportedExtension::CSV,
             'excel' => SupportedExtension::EXCEL,
-            default => throw new \InvalidArgumentException(),
+            default => throw new \InvalidArgumentException("Undefined export type {$export_type}"),
         };
 
-        // Отправка джоба на создание
         Export::dispatch($user->id, $serialized_query, $columns, $type);
 
+        // Returning message to notify user
         return response()->json([
             'message' => $this->message(),
         ]);
     }
 
     /**
-     * Метод очищает все value которые имеют в себе callback функции
-     * В джоб нельзя передать массив или callback функцию, ибо он попытается это сериализировать и выйдет ошибка
+     * This method clears all values that contain callback functions
+     * You cannot pass any callback function to a job, because it will try to serialize it and an error will occur
+     * @param array $columns
+     * @return array
      */
-    protected function removeCallbackValuesFromColumns(array $columns)
+    protected function removeCallbackValuesFromColumns(array $columns): array
     {
         foreach ($columns as $column_key => $column) {
             if (array_key_exists('value', $column) && is_callable($column['value'])) {
@@ -59,15 +68,26 @@ trait ExportOperation
         return $columns;
     }
 
-    public function enableAdvancedExportButtons()
-    {
-        $this->crud->setOperationSetting('advancedExportButtons', true);
-    }
-
-    protected function message()
+    /**
+     * Message that user will be sent to user after successfully starting export process
+     *
+     * @return string
+     */
+    protected function message(): string
     {
         $user = Auth::user();
 
-        return "Сформированный отчет будет отправлен на {$user->email}";
+        return __('backpack_export.successfully_request', ['email' => $user->email]);
+    }
+
+    /**
+     * Enabling package
+     * @return void
+     */
+    public function enableAdvancedExportButtons(): void
+    {
+        $this->crud->setOperationSetting('exportButtons', true);
+        $this->crud->setOperationSetting('advancedExportButtons', true);
+        $this->crud->setOperationSetting('showTableColumnPicker', true);
     }
 }

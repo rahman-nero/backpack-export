@@ -11,14 +11,14 @@ class ExportUserNotify extends Notification
     use Queueable;
 
     /**
-     * Название файла
+     * File name
      */
     private string $file_name;
 
     /**
-     * Путь до файла, включительно с именем
+     * Path to file, included file name
      */
-    private mixed $path_to_file;
+    private string $path_to_file;
 
     /**
      * @param $path_to_file
@@ -41,9 +41,9 @@ class ExportUserNotify extends Notification
         $url = sprintf(config('backpack_export.download_url'), $this->file_name);
 
         return (new MailMessage)
-            ->greeting('Здравствуйте!')
-            ->subject('Экспорт')
-            ->line('Сформировался запрошенный вами экспорт!')
-            ->action("Скачать экспорт ({$this->file_name})", $url);
+            ->greeting(__('backpack_export.mail.greeting'))
+            ->subject(__('backpack_export.mail.subject'))
+            ->line(__('backpack_export.mail.line'))
+            ->action(__('backpack_export.mail.action', ['file_name' => $this->file_name]), $url);
     }
 }

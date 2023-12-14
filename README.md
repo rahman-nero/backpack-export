@@ -2,20 +2,20 @@
 
 To install this package, you have to run this command:
 
-```
+```bash
 composer require nero/backpack-export
 ```
 
 Next step is to run:
 
-```
+```bash
 php artisan vendor:publish --provider="Nero\BackpackExport\Application\ExportServiceProvider"
 ```
 
 As result of command, there will be 2 files added in your application:
 
 1. in app/config, there will be `backpack_export.php` config
-2. in your resource/views/vendor/backpack/crud, there will be `list.blade.php`
+2. in your resource/views/vendor/backpack/crud/inc, there will be `export_buttons.blade.php`
 
 ## How to use
 
@@ -38,18 +38,39 @@ use \Nero\BackpackExport\Application\Traits\ExportOperation;
     }
 ```
 
+> IMPORTANT: You MUST can either `$this->crud->enableExportButtons();` or `$this->enableAdvancedExportButtons();`, but not both!
+
+
 It's done!. Now you can export all data from table, not only the displayed ones
 
+## Uninstall
+
+Uninstalling process is not complicated. It consists of two steps:
+
+1. removing package
+2. removing config and views
+
+To remove package, execute this command
+
+```bash
+composer remove nero/backpack-export
+```
+
+Then we have to delete config. It can be found in config, full path `config/backpack_export.php`:
+
+```bash
+rm config/backpack_export.php
+```
 
 ## TODO
 
-- [ ] Write a better documentation
+- [x] Write a better documentation
 - [ ] Make PDF compatibility
-- [ ] Rewrite all comments from Russian to English
+- [x] Rewrite all comments from Russian to English
 - [ ] Improve handling custom_html columns
 - [ ] Refactoring code
-    - [ ] Fix fetch in view (list.blade.php)
-    - [ ] Remove unnecessary code 
+    - [x] Fix fetch in view (list.blade.php)
+    - [x] Remove unnecessary code
 - [ ] Convert date format in row ("Monday 11 December 2023 14:00:00") to application chosen format
 - [ ] Agility to except any columns from export
 

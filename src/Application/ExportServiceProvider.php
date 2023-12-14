@@ -21,7 +21,12 @@ final class ExportServiceProvider extends ServiceProvider
 
         // Publishing views
         $this->publishes([
-            __DIR__ . '/resources/views' => resource_path('views/vendor/backpack/crud'),
+            __DIR__ . '/resources/views' => resource_path('views/vendor/backpack/crud/inc/'),
+        ]);
+
+        // Publishing languages
+        $this->publishes([
+            __DIR__ . '/resources/lang' => $this->app->langPath('vendor/backpack-export'),
         ]);
     }
 
