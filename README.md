@@ -4,6 +4,10 @@ There is a problem with exporting data from pages in Backpack, it exports only t
 
 So the main purpose of this package is to allow you to export not only data you see on page but all rows. Also, it works even if you have applied filters.
 
+The export based on job. After the export (job) is done, it will send a letter to user's email. But if you want, you can override this logic and set your
+own Notification class, it can be done with changing config (backpack_export.php). 
+
+I recommend to check the config out, it can be found in config of your application (config/backpack_export.php)
 
 ## Install
 
