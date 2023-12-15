@@ -1,3 +1,10 @@
+# Introduction
+
+There is a problem with exporting data from pages in Backpack, it exports only the data that you see on page, and it's limited up to 100 rows.
+
+So the main purpose of this package is to allow you to export not only data you see on page but all rows. Also, it works even if you have applied filters.
+
+
 ## Install
 
 To install this package, you have to run this command:
@@ -38,7 +45,7 @@ use \Nero\BackpackExport\Application\Traits\ExportOperation;
     }
 ```
 
-> IMPORTANT: You MUST can either `$this->crud->enableExportButtons();` or `$this->enableAdvancedExportButtons();`, but not both!
+> IMPORTANT: You MUST call either `$this->crud->enableExportButtons();` or `$this->enableAdvancedExportButtons();`, but not both!
 
 
 It's done!. Now you can export all data from table, not only the displayed ones
