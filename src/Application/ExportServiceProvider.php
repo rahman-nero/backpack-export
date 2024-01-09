@@ -2,6 +2,7 @@
 
 namespace Nero\BackpackExport\Application;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 use Nero\BackpackExport\CSVExport;
 use Nero\BackpackExport\ExcelExport;
@@ -14,6 +15,10 @@ final class ExportServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        Carbon::setLocale(config('app.locale'));
+
+        setlocale(LC_TIME, config('app.locale'));
+
         // Publishing config
         $this->publishes([
             __DIR__ . '/config/backpack_export.php' => config_path('backpack_export.php'),

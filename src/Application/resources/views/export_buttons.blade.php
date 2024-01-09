@@ -67,7 +67,7 @@
                         action: function (e, dt, button, config) {
                             crud.responsiveToggle(dt);
                             @if($crud->get('list.advancedExportButtons'))
-                                execute("excel");
+                                execute("excel", getAllVisibleColumnsNames(this));
                             @else
                                 $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
                             @endif
@@ -86,7 +86,7 @@
                         action: function (e, dt, button, config) {
                             crud.responsiveToggle(dt);
                             @if($crud->get('list.advancedExportButtons'))
-                                execute("csv");
+                                execute("csv", getAllVisibleColumnsNames(this));
                             @else
                                 $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
                             @endif
@@ -146,11 +146,12 @@
 
 
         // Request a export
-        function execute(type) {
+        function execute(type, visibleColumns) {
             const csrf_token = document.head.querySelector('meta[name="csrf-token"]').content;
             const uri = window.location.pathname;
             const data = {
                 export_type: type,
+                columns: visibleColumns
             };
 
             // Create a URLSearchParams object
@@ -178,6 +179,22 @@
                 });
         }
 
+        function getAllVisibleColumnsNames(table) {
+            const visibleColumns = [];
+
+            table.columns().visible()
+                .each((item, key) => {
+                    if (item === true) {
+                        const column = table.columns().header()[key];
+
+                        if (column.dataset.hasOwnProperty('columnName')) {
+                            visibleColumns.push(column.dataset.columnName);
+                        }
+                    }
+                });
+
+            return visibleColumns;
+        }
 
         // move the datatable buttons in the top-right corner and make them smaller
         function moveExportButtonsToTopRight() {

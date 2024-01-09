@@ -28,14 +28,19 @@ trait ExportOperation
     {
         $user = Auth::user();
 
+        // Type of export that user wants
+        $export_type = $this->crud->getRequest()->input('export_type');
+
+        // All columns that will be in export
+        $visible_columns = $this->crud->getRequest()->input('columns');
+
         // All set up columns from setupListOperation. Cleaned up before serialization
         $columns = $this->removeCallbackValuesFromColumns($this->crud->columns());
 
         // Serialized query to pass to the job
         $serialized_query = \EloquentSerialize::serialize($this->crud->query);
 
-        // Type of export that user wants
-        $export_type = $this->crud->getRequest()->input('export_type');
+        $filtered_columns = $this->filterColumns($columns, $visible_columns);
 
         $type = match ($export_type) {
             'csv' => SupportedExtension::CSV,
@@ -43,7 +48,7 @@ trait ExportOperation
             default => throw new \InvalidArgumentException("Undefined export type {$export_type}"),
         };
 
-        Export::dispatch($user->id, $serialized_query, $columns, $type);
+        Export::dispatch($user->id, $serialized_query, $filtered_columns, $type);
 
         // Returning message to notify user
         return response()->json([
@@ -66,6 +71,19 @@ trait ExportOperation
         }
 
         return $columns;
+    }
+
+    /**
+     * Remove all hidden columns
+     * @param array $columns
+     * @param array $visible_columns
+     * @return array
+     */
+    public function filterColumns(array $columns, array $visible_columns): array
+    {
+        return array_filter($columns, function ($item, $key) use ($visible_columns) {
+            return in_array($key, $visible_columns);
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     /**

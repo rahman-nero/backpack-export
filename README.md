@@ -87,11 +87,10 @@ rm resources/lang/ru/backpack_export.php
 
 - [x] Write a better documentation
 - [ ] Make PDF compatibility
-- [x] Rewrite all comments from Russian to English
 - [ ] Improve handling custom_html columns
 - [ ] Refactoring code
     - [x] Fix fetch in view (list.blade.php)
     - [x] Remove unnecessary code
-- [ ] Convert date format in row ("Monday 11 December 2023 14:00:00") to application chosen format
-- [ ] Agility to except any columns from export
+- [x] Convert date format in row ("Monday 11 December 2023 14:00:00") to application chosen format
+- [x] Agility to except any columns from export
 

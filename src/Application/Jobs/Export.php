@@ -133,9 +133,11 @@ final class Export implements ShouldQueue
 
                         $fill[] = $relationship_result;
                     } elseif ($type === 'date') {
-                        $fill[] = $item->{$column_name}?->format('l j F Y');
+                        $format = $column_settings['format'] ?? 'D MMMM YYYY';
+                        $fill[] = $item->{$column_name}?->isoFormat($format);
                     } elseif ($type === 'datetime') {
-                        $fill[] = $item->{$column_name}?->format('l j F Y H:i:s');
+                        $format = $column_settings['format'] ?? 'D MMMM YYYY, H:mm:ss';
+                        $fill[] = $item->{$column_name}?->isoFormat($format);
                     } elseif (array_key_exists($column_name, $casts) && $casts[$column_name] === 'array') {
                         // If our columns is 'array' in model casts, then we join it with native php function
                         $fill[] = implode(';', $item->{$column_name} ?? []);
@@ -143,7 +145,6 @@ final class Export implements ShouldQueue
                         // All unhandled types will not be handled in any type
                         $fill[] = $item->{$column_name};
                     }
-
                 }
 
                 $data[] = $fill;
