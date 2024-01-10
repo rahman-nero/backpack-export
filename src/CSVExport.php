@@ -9,12 +9,14 @@ use PhpOffice\PhpSpreadsheet\Writer\Csv;
 final class CSVExport implements ExportInterface
 {
     /**
-     * Последняя строка в которую писали данные
+     * Index of last written row
+     * @var int
      */
     private int $row = 0;
 
     /**
-     * Хранит информацию о том, есть ли колонки в файле
+     * True if columns from file is filled with data
+     * @var bool
      */
     private bool $is_columns_filled = false;
 
@@ -32,16 +34,16 @@ final class CSVExport implements ExportInterface
      */
     public function fill(array $data): void
     {
-        // Если первую строку не заняли колонками, то просто оставляем строку пустым
+        // If columns from the file is not empty, return 1 as last written row otherwise 0
         $last_row = $this->isColumnsFilled()
             ? $this->row
             : 1;
 
-        // Присваиваем данные, начиная от А1
+        // Filling the file starting from last written row + 1
         $this->spreadsheet->getActiveSheet()
             ->fromArray($data, null, 'A' . $last_row + 1);
 
-        // Указываем, где последняя строка в которую записали
+        // Updating last written row to actual value
         $this->row += count($data);
     }
 
@@ -55,10 +57,10 @@ final class CSVExport implements ExportInterface
         $this->spreadsheet->getActiveSheet()
             ->fromArray([$columns], null, 'A1');
 
-        // Делаем марку о том, что заполнили колонки (первую строку)
+        // Noting that the columns is written in file
         $this->is_columns_filled = true;
 
-        // Присваиваем 1, ибо заняли первую строку
+        // Assign 1 as last written row
         $this->row = 1;
     }
 
@@ -77,7 +79,7 @@ final class CSVExport implements ExportInterface
     }
 
     /**
-     * Проверяет заполнены ли колонки
+     * Checks if the columns from file is filled with text
      * @return bool
      */
     public function isColumnsFilled(): bool
