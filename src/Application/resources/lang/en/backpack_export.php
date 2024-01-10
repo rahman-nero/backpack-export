@@ -8,4 +8,11 @@ return [
         'line'     => 'The export you requested has been generated!',
         'action'   => 'Download (:file_name)',
     ],
+
+    'model' => [
+        'boolean' => [
+            'true'  => 'Yes',
+            'false' => 'No',
+        ],
+    ],
 ];

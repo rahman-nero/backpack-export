@@ -59,6 +59,7 @@ trait ExportOperation
     /**
      * This method clears all values that contain callback functions
      * You cannot pass any callback function to a job, because it will try to serialize it and an error will occur
+     *
      * @param array $columns
      * @return array
      */
@@ -68,13 +69,17 @@ trait ExportOperation
             if (array_key_exists('value', $column) && is_callable($column['value'])) {
                 $columns[$column_key]['value'] = 'removed_callback';
             }
+
+            if (array_key_exists('wrapper', $column)) {
+                $columns[$column_key]['wrapper'] = null;
+            }
         }
 
         return $columns;
     }
 
     /**
-     * Remove all hidden columns
+     * Remove all columns that hidden by user
      * @param array $columns
      * @param array $visible_columns
      * @return array

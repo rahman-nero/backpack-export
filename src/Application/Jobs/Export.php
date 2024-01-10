@@ -132,12 +132,28 @@ final class Export implements ShouldQueue
                         }
 
                         $fill[] = $relationship_result;
+                    } elseif ($type === 'select_from_array' || $type === 'select2_from_array') {
+                        $value = $item->{$column_name};
+                        $fill[] = $column_settings['options'][$value] ?? $value;
+                    } elseif ($type === 'model_function') {
+                        $value = call_user_func([$item, $column_settings['function_name']], $item->{$column_name});
+                        if (is_array($value)) {
+                            $value = implode(';', $value);
+                        }
+                        $fill[] = strip_tags($value);
                     } elseif ($type === 'date') {
                         $format = $column_settings['format'] ?? 'D MMMM YYYY';
                         $fill[] = $item->{$column_name}?->isoFormat($format);
                     } elseif ($type === 'datetime') {
                         $format = $column_settings['format'] ?? 'D MMMM YYYY, H:mm:ss';
                         $fill[] = $item->{$column_name}?->isoFormat($format);
+                    } elseif ($type === 'time') {
+                        $format = $column_settings['format'] ?? 'H:mm:ss';
+                        $fill[] = $item->{$column_name}?->isoFormat($format);
+                    } elseif ($type === 'check') {
+                        $fill[] = $item->{$column_name} === true
+                            ? __('backpack_export.model.boolean.true')
+                            : __('backpack_export.model.boolean.false');
                     } elseif (array_key_exists($column_name, $casts) && $casts[$column_name] === 'array') {
                         // If our columns is 'array' in model casts, then we join it with native php function
                         $fill[] = implode(';', $item->{$column_name} ?? []);
